@@ -28,14 +28,27 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.button.setOnClickListener {
-            viewModel.search(binding.search.text.toString())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    { binding.result.text = it.toString() },
-                    { Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show() }
-                ).also { compositeDisposable.add(it) }
+        Observable.create {
+            binding.search.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                override fun onTextChanged(p0: CharSequence, p1: Int, p2: Int, p3: Int) {
+                    if (p0.isBlank()) return
+                    it.onNext(p0.toString())
+                }
+
+                override fun afterTextChanged(p0: Editable?) {}
+            })
         }
+            .subscribeOn(Schedulers.io())
+            .subscribe { query ->
+                viewModel.search(query)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        { binding.result.text = it.toString() },
+                        { Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show() }
+                    ).also { compositeDisposable.add(it) }
+            }.also { compositeDisposable.add(it) }
 
         viewModel.error
             .observeOn(AndroidSchedulers.mainThread())
