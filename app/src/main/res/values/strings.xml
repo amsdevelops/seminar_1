@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">seminar_1</string>
+    <string name="button_search_text">Искать</string>
 </resources>
