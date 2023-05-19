@@ -14,6 +14,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -35,6 +36,12 @@ class MainActivity : AppCompatActivity() {
                     { Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show() }
                 ).also { compositeDisposable.add(it) }
         }
+
+        viewModel.error
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }.also { compositeDisposable.add(it) }
     }
 
     override fun onDestroy() {
